@@ -1,0 +1,3 @@
+## 2025-02-18 - Optimize PR Status Checks with Concurrency
+**Learning:** Subprocess calls to the GitHub CLI ('gh') sequentially (like looping over PRs and running `gh pr view` for each) can cause massive N+1 performance bottlenecks because subprocess creation and network latency add up sequentially.
+**Action:** Always use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) for batch processing independent CLI commands. Use `executor.map` to preserve order and catch/handle exceptions in the map flow using helper functions.
