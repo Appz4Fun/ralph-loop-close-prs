@@ -1,0 +1,3 @@
+## 2024-06-02 - Use Concurrency for GH CLI Calls
+**Learning:** Subprocess calls to the GitHub CLI (`gh`) are a significant performance bottleneck. When checking states for multiple PRs sequentially, the N+1 delays accumulate quickly, especially in fan-out or batch operations.
+**Action:** When making multiple independent `gh` calls (e.g., checking if PRs are still open), use `concurrent.futures.ThreadPoolExecutor` to execute them concurrently. Use `executor.map` and a wrapper function to preserve original order and capture exceptions so they can be processed predictably.
