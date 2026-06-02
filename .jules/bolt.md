@@ -1,0 +1,3 @@
+## 2025-01-20 - Use ThreadPoolExecutor to prevent N+1 process delays
+**Learning:** Checking states sequentially for multiple PRs via a subprocess shell call like `gh` causes a significant performance bottleneck due to process startup overhead compounding linearly.
+**Action:** When filtering or gathering data for multiple PRs iteratively via shell commands, use `concurrent.futures.ThreadPoolExecutor` mapped over the sequence. This parallelises the IO/subprocess wait overhead. Ensure exceptions within the threads are caught and returned to the main loop to preserve original error handling behaviour, and use `executor.map` to preserve correct ordering.
