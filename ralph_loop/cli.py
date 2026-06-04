@@ -1,6 +1,8 @@
 """Command-line interface and top-level orchestration."""
 from __future__ import annotations
 
+import concurrent.futures
+
 import argparse
 import os
 import re
@@ -529,6 +531,12 @@ def _spawn_child(
     return proc, log_path, log_handle
 
 
+def _check_pr_state(pr: int) -> Tuple[int, bool, Optional[Exception]]:
+    try:
+        return pr, _pr_is_still_open(pr), None
+    except CommandError as exc:
+        return pr, True, exc  # Keep PR on transient failure
+
 def _filter_to_still_open_prs(pr_numbers: List[int]) -> List[int]:
     """Drop PRs that are no longer OPEN/non-draft via a targeted gh pr view.
 
@@ -544,17 +552,19 @@ def _filter_to_still_open_prs(pr_numbers: List[int]) -> List[int]:
     swallow stale PRs because of a flaky network.
     """
     kept: List[int] = []
-    for pr in pr_numbers:
-        try:
-            still_open = _pr_is_still_open(pr)
-        except CommandError as exc:
+
+    # Use ThreadPoolExecutor to avoid N+1 sequential execution delays
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        results = list(executor.map(_check_pr_state, pr_numbers))
+
+    for pr, still_open, exc in results:
+        if exc is not None:
             _print_step(
                 "Could not confirm PR #{} open state ({}); keeping it in the "
                 "fan-out set.".format(pr, exc)
             )
             kept.append(pr)
-            continue
-        if still_open:
+        elif still_open:
             kept.append(pr)
         else:
             _print_step(
