@@ -1,0 +1,3 @@
+## 2024-05-24 - Concurrent PR State Checking
+**Learning:** Checking PR open states sequentially via the `gh` CLI in a fan-out supervisor loop introduces severe N+1 latency, bottlenecking orchestration throughput. Since `gh pr view` uses synchronous network I/O per PR, a list of 50 PRs can take over 5 seconds locally, whereas concurrent checks reduce this to ~0.5 seconds.
+**Action:** Always fetch PR metadata or states concurrently (e.g., `concurrent.futures.ThreadPoolExecutor`) when working with lists, ensuring exceptions like `CommandError` are captured and processed in order without losing state.
