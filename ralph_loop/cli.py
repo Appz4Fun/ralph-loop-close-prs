@@ -350,6 +350,8 @@ def _validate_pr_metadata(
             "branch.".format(pr_number)
         )
     pr_base = pr_data.get("baseRefName")
+    if pr_base and pr_base.startswith("-"):
+        raise CommandError("PR base branch starts with a hyphen, which is a security risk.")
     if pr_base and pr_base != expected_base:
         raise CommandError(
             "PR #{} targets base '{}' but --base is '{}'. Use the PR base branch.".format(
@@ -360,6 +362,8 @@ def _validate_pr_metadata(
     branch = pr_data.get("headRefName")
     if not branch:
         raise CommandError("Could not resolve PR head branch.")
+    if branch.startswith("-"):
+        raise CommandError("PR head branch starts with a hyphen, which is a security risk.")
     if branch == expected_base:
         raise CommandError(
             "PR head branch '{}' matches base '{}'; aborting.".format(
