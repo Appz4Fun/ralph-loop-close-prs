@@ -1,0 +1,3 @@
+## 2025-02-14 - Optimize PR State Checks
+**Learning:** Sequential subprocess calls to the GitHub CLI ('gh') (e.g., via `_pr_is_still_open`) can be a significant performance bottleneck when checking multiple PRs during the fan-out process, resulting in N+1 execution delays.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` and `executor.map` to execute GitHub CLI subprocesses concurrently. Wrap the call in a helper to gracefully catch exceptions (like `CommandError`) and return them, allowing the caller to iterate through the results in the original order and handle failures without crashing the concurrent execution block.
