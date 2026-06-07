@@ -1,0 +1,5 @@
+## 2026-06-07 - Mitigate Git argument injection risk from PR metadata
+
+**Vulnerability:** External PR branch names (head and base) fetched from GitHub could start with a hyphen (`-`). If these branch names are passed directly to `git` CLI commands without `--`, they could be interpreted as command-line options by Git, leading to arbitrary argument injection and potential remote code execution or data exfiltration.
+**Learning:** In automation scripts using the `subprocess` module to call `git` with external data, it is a critical security risk to trust remote strings (even branch names). Although many commands use `subprocess` safely with lists, the elements of the list are still evaluated by the underlying binary (like `git`).
+**Prevention:** Validate all branch and base names fetched from remote sources to ensure they do not start with a hyphen (`-`) before passing them to git commands. Alternately, use `--` before passing branch names to `git` commands, but failing fast during PR metadata validation prevents the malicious branch from entering the system at all.
