@@ -1,0 +1,3 @@
+## 2025-02-23 - Concurrent GitHub CLI Checks
+**Learning:** Checking PR statuses sequentially via `gh pr view` creates significant N+1 performance bottlenecks when spawning fan-out supervisors. Subprocess calls to the GitHub CLI are safe to run concurrently, but exception handling must be preserved to handle transient network issues without dropping PRs.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to run independent `gh` CLI checks in parallel. Wrap operations in a helper function to catch `CommandError` exceptions and yield them alongside the results, allowing the calling loop to process results (and print warnings) in order while preserving concurrency.
