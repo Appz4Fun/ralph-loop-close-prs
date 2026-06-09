@@ -1,4 +1,5 @@
 """GitHub CLI helpers."""
+
 from __future__ import annotations
 
 import json
@@ -267,9 +268,9 @@ def _sign_off_pr(pr_ref: str, head_sha: str = ""):
     _print_step("Submitting PR approval as {}".format(gh_user))
     if head_sha:
         result = _gh_run_with_retry(
-                [
-                    "api",
-                    "repos/{{owner}}/{{repo}}/pulls/{}/reviews".format(pr_ref),
+            [
+                "api",
+                "repos/{{owner}}/{{repo}}/pulls/{}/reviews".format(pr_ref),
                 "-f",
                 "event=APPROVE",
                 "-f",
@@ -305,7 +306,9 @@ def _sign_off_pr(pr_ref: str, head_sha: str = ""):
 
 def _prepare_pr_for_merge(pr_ref: str):
     _mark_pr_needs_review(pr_ref)
-    _run_command(["git", "config", "gpg.format", "ssh"], check=True, capture_output=True)
+    _run_command(
+        ["git", "config", "gpg.format", "ssh"], check=True, capture_output=True
+    )
     _run_command(
         ["git", "config", "user.signingkey", SSH_SIGNING_KEY],
         check=True,
