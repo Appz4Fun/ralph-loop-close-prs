@@ -1,0 +1,3 @@
+## 2024-05-24 - Speeding up sequential GitHub CLI calls
+**Learning:** Subprocess calls to the GitHub CLI (`gh`) are a significant performance bottleneck. When verifying multiple states (like open PRs) sequentially, it causes an N+1 delay problem.
+**Action:** Always use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) to fan-out expensive CLI checks. Use `executor.map` with a helper wrapper to preserve order and capture exceptions to handle them gracefully in the original sequence.
