@@ -1,0 +1,3 @@
+## 2024-06-10 - Concurrency for GitHub PR State Checks
+**Learning:** Using `gh pr view` sequentially in a loop (`_filter_to_still_open_prs`) blocks the supervisor and wastes time on IO-bound network operations (N+1 queries).
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to check PR states concurrently, while capturing exceptions in a helper to avoid thread pool crashes and maintain deterministic order.
