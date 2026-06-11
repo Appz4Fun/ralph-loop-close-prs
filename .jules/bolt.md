@@ -1,0 +1,3 @@
+## 2024-05-18 - Concurrent execution of github pr lookups
+**Learning:** Checking states for multiple PRs using subprocess calls to the GitHub CLI sequentially causes N+1 execution delays and is a significant performance bottleneck.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to perform these lookups concurrently. Use `executor.map` to preserve the original order and cleanly wrap the inner method to gracefully capture and handle `CommandError`.
