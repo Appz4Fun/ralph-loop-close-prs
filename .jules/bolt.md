@@ -1,0 +1,3 @@
+## 2025-01-20 - Optimize PR fan-out state checks with concurrency
+**Learning:** Subprocess calls to the GitHub CLI (`gh`), executed sequentially in a loop, are a major performance bottleneck (N+1 delay pattern). When querying states for multiple PRs, `concurrent.futures.ThreadPoolExecutor` should be used instead. However, computing max_workers dynamically (e.g. `max_workers=min(10, len(items))`) will crash with a `ValueError` if the list is empty (`max_workers=0`).
+**Action:** Always wrap concurrent executions querying remote resources inside a guard clause (e.g., `if not items: return []`) to ensure the input list is non-empty before starting the executor, avoiding `max_workers=0`.
