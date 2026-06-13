@@ -1,0 +1,3 @@
+## 2024-05-24 - [Fan-out Supervisor Performance]
+**Learning:** Subprocess calls to the GitHub CLI ('gh') are a significant performance bottleneck. When checking states for multiple PRs, using N+1 sequential execution delays the supervisor startup.
+**Action:** Use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) to avoid N+1 sequential execution delays. Ensure that the original order is preserved by using `executor.map`, and capture exceptions (like `CommandError`) in a helper wrapper so they can be yielded and handled gracefully in order.
