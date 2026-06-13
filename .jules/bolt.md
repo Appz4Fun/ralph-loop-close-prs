@@ -1,0 +1,3 @@
+## 2026-06-13 - [Optimize PR Status Check]
+**Learning:** The GitHub CLI process (`gh`) checking PR status sequentially was causing N+1 delays, which is a common bottleneck in scripts polling the `gh` API sequentially.
+**Action:** When multiple independent queries are needed, I will implement a concurrent fetch with a ThreadPoolExecutor. I will also be careful to add an early guard clause `if not list: return list` before calculating `max_workers` to avoid ValueError in python 3.9+. I will also use `executor.map` to preserve ordering.
