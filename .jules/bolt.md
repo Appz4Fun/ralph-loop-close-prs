@@ -1,0 +1,3 @@
+## 2024-06-13 - Concurrent PR View Optimization
+**Learning:** `_filter_to_still_open_prs` executed `_pr_is_still_open` sequentially. Since it relies on the GitHub CLI (`gh`), sequential executions introduced severe N+1 latency, particularly when dealing with many PRs.
+**Action:** Used `concurrent.futures.ThreadPoolExecutor` to run GitHub CLI subprocess calls in parallel, bounded to 10 workers. Leveraged `executor.map` to guarantee that results are processed deterministically, and added a guard clause `if not pr_numbers` to avoid a zero-worker crash. Always batch or parallelize repeated slow sub-processes when preserving order is straightforward.
