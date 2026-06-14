@@ -1,0 +1,3 @@
+## 2025-02-28 - Concurrency for _filter_to_still_open_prs
+**Learning:** `_filter_to_still_open_prs` invokes a slow `_pr_is_still_open` command per PR which makes it sequentially bottlenecked. We can use ThreadPoolExecutor to run these lookups in parallel. This significantly decreases the start time.
+**Action:** Always check loop constructs for sequential execution of external network or IO-bound operations and convert them to parallel execution with `concurrent.futures` when possible, remembering to use a guard block for empty lists (`if not items: return []`) so that `min(10, len(items))` does not evaluate to `0` and raise a `ValueError`.
