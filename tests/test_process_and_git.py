@@ -233,11 +233,7 @@ def test_run_command_interrupts_commands_when_wall_clock_deadline_expires(monkey
 
 
 def test_run_command_replays_only_bounded_captured_output(monkeypatch, capsys):
-    script = (
-        "import sys; "
-        "sys.stdout.write('A' * 80); "
-        "sys.stderr.write('B' * 70)"
-    )
+    script = "import sys; " "sys.stdout.write('A' * 80); " "sys.stderr.write('B' * 70)"
     monkeypatch.setattr(process, "MAX_CAPTURED_STREAM_BYTES", 20)
 
     result = process._run_command(
@@ -409,7 +405,9 @@ def test_checkout_branch_exits_cleanly_when_branch_used_by_worktree(
         spy(
             side_effect=[
                 completed_process(),
-                completed_process(returncode=1, stderr="fatal: already used by worktree"),
+                completed_process(
+                    returncode=1, stderr="fatal: already used by worktree"
+                ),
             ]
         ),
     )

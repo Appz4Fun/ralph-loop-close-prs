@@ -124,9 +124,7 @@ def test_gh_run_with_retry_returns_last_failure_when_unchecked(
         ),
     )
 
-    result = gh_ops._gh_run_with_retry(
-        ["pr", "view"], check=False, capture_output=True
-    )
+    result = gh_ops._gh_run_with_retry(["pr", "view"], check=False, capture_output=True)
 
     assert result.returncode == 4
 
@@ -190,7 +188,9 @@ def test_gh_json_allow_empty_accepts_empty_success_and_textual_empty_errors(
     assert gh_ops._gh_json_allow_empty(["pr", "checks"]) == []
 
 
-def test_pr_checks_maps_gh_pending_exit_to_pending_check(monkeypatch, completed_process):
+def test_pr_checks_maps_gh_pending_exit_to_pending_check(
+    monkeypatch, completed_process
+):
     monkeypatch.setattr(
         gh_ops,
         "_gh_run_with_retry",
@@ -350,12 +350,7 @@ def test_mark_pr_needs_review_uses_retry_wrapper_for_label_mutations(
 def test_mark_pr_needs_review_reports_label_failures(
     results, expected_match, monkeypatch, spy, completed_process
 ):
-    gh_run = spy(
-        side_effect=[
-            completed_process(**result)
-            for result in results
-        ]
-    )
+    gh_run = spy(side_effect=[completed_process(**result) for result in results])
     monkeypatch.setattr(gh_ops, "_gh_run_with_retry", gh_run)
 
     with pytest.raises(CommandError, match=expected_match):
@@ -618,8 +613,16 @@ def test_pr_checks_soft_fails_coderabbit_insufficient_credits(monkeypatch):
         ],
     )
     result = gh_ops._pr_checks("feature", required_only=False)
-    coderabbit_first = next(c for c in result if c["name"] == "CodeRabbit" and "Insufficient" in c.get("description", ""))
-    coderabbit_other = next(c for c in result if c["name"] == "CodeRabbit" and "Something" in c.get("description", ""))
+    coderabbit_first = next(
+        c
+        for c in result
+        if c["name"] == "CodeRabbit" and "Insufficient" in c.get("description", "")
+    )
+    coderabbit_other = next(
+        c
+        for c in result
+        if c["name"] == "CodeRabbit" and "Something" in c.get("description", "")
+    )
     assert coderabbit_first["bucket"] == "skipping"
     assert coderabbit_first["soft_failed"] is True
     assert coderabbit_other["bucket"] == "fail"
@@ -703,9 +706,7 @@ def test_merge_pr_treats_already_merged_state_as_success(
     assert gh_run.call_count == 2
 
 
-def test_merge_pr_skips_branch_delete_for_fork_prs(
-    monkeypatch, spy, completed_process
-):
+def test_merge_pr_skips_branch_delete_for_fork_prs(monkeypatch, spy, completed_process):
     monkeypatch.setattr(gh_ops, "_git_head_sha", lambda: "abc")
     monkeypatch.setattr(gh_ops, "_ensure_pr_head_matches_local", lambda *a: None)
     monkeypatch.setattr(gh_ops, "_sign_off_pr", lambda *a, **k: None)
@@ -750,9 +751,7 @@ def test_truthy_and_ssh_public_key_detection():
     assert identity._is_truthy("YES") is True
     assert identity._is_truthy("no") is False
     assert identity._looks_like_ssh_public_key("ssh-ed25519 AAA") is True
-    assert (
-        identity._looks_like_ssh_public_key("sk-ssh-ed25519@openssh.com AAA") is True
-    )
+    assert identity._looks_like_ssh_public_key("sk-ssh-ed25519@openssh.com AAA") is True
     assert identity._looks_like_ssh_public_key("not-a-key") is False
 
 
@@ -958,6 +957,7 @@ def test_env_ssh_key_paths_and_command_expand_user_before_identity_setup(
         for key, value in env.items():
             patched.setenv(key, value)
         _reload_config_and_identity()
+
         def fake_run(cmd, *_args, **_kwargs):
             if cmd == ["git", "remote", "get-url", "origin"]:
                 return completed_process(stdout="git@github.com:owner/repo.git\n")

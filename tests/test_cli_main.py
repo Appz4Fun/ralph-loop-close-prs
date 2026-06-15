@@ -216,9 +216,7 @@ def test_main_explicit_pr_does_not_require_current_branch(cli_harness, cli_args)
     harness.pr_view.assert_called_once_with("12")
 
 
-def test_main_rejects_numeric_current_branch_without_explicit_pr(
-    cli_harness, cli_args
-):
+def test_main_rejects_numeric_current_branch_without_explicit_pr(cli_harness, cli_args):
     harness = cli_harness(args=cli_args(pr=None))
     harness.git_branch.return_value = "123"
 
@@ -349,9 +347,7 @@ def test_main_merge_path_emits_json_telemetry(cli_harness, cli_args, tmp_path):
     assert events[-1]["event"] == "run.done"
 
 
-def test_main_signal_handler_exits_with_shell_status(
-    monkeypatch, cli_args, capfd
-):
+def test_main_signal_handler_exits_with_shell_status(monkeypatch, cli_args, capfd):
     captured = {}
 
     def capture_signal(signum, handler):
@@ -371,14 +367,14 @@ def test_main_signal_handler_exits_with_shell_status(
     assert "Received SIGINT" in capfd.readouterr().err
 
 
-def test_main_signal_handler_does_not_use_buffered_stderr(
-    monkeypatch, cli_args, capfd
-):
+def test_main_signal_handler_does_not_use_buffered_stderr(monkeypatch, cli_args, capfd):
     captured = {}
 
     class ReentrantStderr:
         def write(self, _text):
-            raise RuntimeError("reentrant call inside <_io.BufferedWriter name='<stderr>'>")
+            raise RuntimeError(
+                "reentrant call inside <_io.BufferedWriter name='<stderr>'>"
+            )
 
         def flush(self):
             raise RuntimeError("reentrant flush")
@@ -524,9 +520,7 @@ def test_main_merge_path_orders_revalidation_prepare_and_merge(
     assert call_order == ["pr_view", "pr_view", "prepare", "merge"]
 
 
-def test_main_final_rebase_rechecks_pr_checks_before_merge(
-    cli_harness, cli_args
-):
+def test_main_final_rebase_rechecks_pr_checks_before_merge(cli_harness, cli_args):
     harness = cli_harness(args=cli_args(skip_rebase=False, skip_merge=False))
 
     assert cli.main() == 0
@@ -603,7 +597,9 @@ def test_parse_args_rejects_pr_with_multiple_directories(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["ralph", "--pr", "5", "/tmp/a", "/tmp/b"])
     with pytest.raises(SystemExit):
         cli._parse_args()
-    assert "--pr cannot be combined with multiple directories" in capsys.readouterr().err
+    assert (
+        "--pr cannot be combined with multiple directories" in capsys.readouterr().err
+    )
 
 
 def test_main_chdirs_into_directory_argument_before_resolving_pr(
@@ -727,9 +723,7 @@ def test_spawn_child_uses_devnull_stdin_and_writes_log_header(monkeypatch, tmp_p
     assert "spawn" in (log_root / "pr-77.log").read_text()
 
 
-def test_fan_out_all_prs_returns_zero_when_no_open_prs(
-    monkeypatch, cli_args, tmp_path
-):
+def test_fan_out_all_prs_returns_zero_when_no_open_prs(monkeypatch, cli_args, tmp_path):
     monkeypatch.setattr(cli, "_list_open_prs", lambda _base: [])
     monkeypatch.setattr(
         cli.subprocess, "Popen", lambda *a, **k: pytest.fail("should not spawn")
@@ -850,9 +844,7 @@ def test_fan_out_supervisor_escalates_backoff_across_consecutive_short_lived_fai
 
     def fake_popen(_cmd, **_kwargs):
         # Child always exits non-zero on its first poll.
-        proc = _FakeProc(
-            pid=100 + len(procs_made), exit_after_polls=1, returncode=1
-        )
+        proc = _FakeProc(pid=100 + len(procs_made), exit_after_polls=1, returncode=1)
         procs_made.append(proc)
         return proc
 
@@ -907,11 +899,9 @@ def test_fan_out_supervisor_escalates_backoff_across_consecutive_short_lived_fai
     for prev, cur in zip(backoffs, backoffs[1:]):
         assert cur >= prev, "backoff regressed mid-sequence: {}".format(backoffs)
     # And it should eventually hit the env-failure cap given enough cycles.
-    assert max(backoffs) >= 240, (
-        "expected backoff to ramp toward the env-failure cap; saw {}".format(
-            backoffs
-        )
-    )
+    assert (
+        max(backoffs) >= 240
+    ), "expected backoff to ramp toward the env-failure cap; saw {}".format(backoffs)
 
 
 def test_fan_out_supervisor_kills_idle_child_using_log_mtime_watchdog(
@@ -955,9 +945,9 @@ def test_fan_out_supervisor_kills_idle_child_using_log_mtime_watchdog(
     )
 
     assert rc == 0
-    assert any(p.terminated or p.killed for p in procs_made), (
-        "watchdog should have terminated the idle child"
-    )
+    assert any(
+        p.terminated or p.killed for p in procs_made
+    ), "watchdog should have terminated the idle child"
 
 
 def test_main_with_all_prs_triggers_fan_out_and_skips_single_pr_path(
@@ -967,9 +957,7 @@ def test_main_with_all_prs_triggers_fan_out_and_skips_single_pr_path(
     target.mkdir()
     script_path = tmp_path / "ralph_script.py"
     script_path.write_text("# stub\n")
-    monkeypatch.setattr(
-        sys, "argv", [str(script_path), "--all-prs", str(target)]
-    )
+    monkeypatch.setattr(sys, "argv", [str(script_path), "--all-prs", str(target)])
     harness = cli_harness(args=cli_args(all_prs=True, directory=[str(target)]))
     called = {"count": 0}
 
@@ -1680,9 +1668,9 @@ def test_open_log_handle_cloexec_sets_close_on_exec_on_real_fd(tmp_path):
     handle = cli._open_log_handle_cloexec(str(log_path))
     try:
         flags = fcntl.fcntl(handle.fileno(), fcntl.F_GETFD)
-        assert flags & fcntl.FD_CLOEXEC, (
-            "expected FD_CLOEXEC bit on real log handle fd, got {:#x}".format(flags)
-        )
+        assert (
+            flags & fcntl.FD_CLOEXEC
+        ), "expected FD_CLOEXEC bit on real log handle fd, got {:#x}".format(flags)
     finally:
         handle.close()
 
@@ -1726,9 +1714,7 @@ def test_fan_out_installs_sighup_reload_handler(monkeypatch, cli_args, tmp_path)
         str(script_path),
     )
 
-    callable_installs = {
-        signum for signum, handler in install_log if callable(handler)
-    }
+    callable_installs = {signum for signum, handler in install_log if callable(handler)}
     assert signal.SIGINT in callable_installs
     assert signal.SIGTERM in callable_installs
     assert signal.SIGHUP in callable_installs
@@ -1789,9 +1775,7 @@ def test_fan_out_sighup_triggers_execv_with_supervisor_argv(
     script_path.write_text("# stub\n")
     log_dir = tmp_path / "logs"
 
-    monkeypatch.setattr(
-        sys, "argv", [str(script_path), "--all-prs", "--base", "main"]
-    )
+    monkeypatch.setattr(sys, "argv", [str(script_path), "--all-prs", "--base", "main"])
 
     with pytest.raises(SystemExit, match="execv-called"):
         cli._fan_out_all_prs(
@@ -1847,9 +1831,7 @@ def test_fan_out_no_execv_when_normal_shutdown(monkeypatch, cli_args, tmp_path):
     monkeypatch.setattr(cli, "_supervisor_wait", fake_wait)
 
     exec_calls = []
-    monkeypatch.setattr(
-        cli.os, "execv", lambda *a, **k: exec_calls.append(a)
-    )
+    monkeypatch.setattr(cli.os, "execv", lambda *a, **k: exec_calls.append(a))
 
     script_path = tmp_path / "ralph_script.py"
     script_path.write_text("# stub\n")
