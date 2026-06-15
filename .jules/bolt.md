@@ -1,0 +1,3 @@
+## 2024-05-24 - Concurrent PR State Checks
+**Learning:** Subprocess calls to the GitHub CLI ('gh') are a significant performance bottleneck. When checking states for multiple PRs sequentially, it leads to N+1 execution delays.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to fetch states concurrently. Ensure original order is preserved with `executor.map`, handle empty collections with a guard clause to prevent `ValueError` for `max_workers=0`, and capture exceptions to handle them sequentially.
