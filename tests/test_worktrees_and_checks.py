@@ -115,7 +115,10 @@ def test_fetch_pr_branch_falls_back_to_pull_head_ref(
     monkeypatch, spy, completed_process
 ):
     run = spy(
-        side_effect=[completed_process(returncode=1, stderr="nope"), completed_process()]
+        side_effect=[
+            completed_process(returncode=1, stderr="nope"),
+            completed_process(),
+        ]
     )
     monkeypatch.setattr(worktrees, "_run_command", run)
 
@@ -181,9 +184,7 @@ def test_ensure_pr_worktree_operates_in_place_when_branch_is_checked_out_at_cwd(
     monkeypatch.setattr(
         worktrees, "_fetch_pr_branch_or_head", lambda **_kwargs: "origin/feature"
     )
-    monkeypatch.setattr(
-        worktrees, "_worktree_for_branch", lambda _branch: str(target)
-    )
+    monkeypatch.setattr(worktrees, "_worktree_for_branch", lambda _branch: str(target))
     origin_calls = []
     sync_calls = []
     monkeypatch.setattr(
@@ -220,7 +221,9 @@ def test_ensure_pr_worktree_reuses_matching_path_and_rejects_wrong_branch(
     )
     monkeypatch.setattr(worktrees, "_worktree_for_branch", lambda _branch: None)
     monkeypatch.setattr(worktrees, "_worktree_path_is_registered", lambda _path: True)
-    monkeypatch.setattr(worktrees, "_ensure_worktree_origin_matches", lambda _path: None)
+    monkeypatch.setattr(
+        worktrees, "_ensure_worktree_origin_matches", lambda _path: None
+    )
     monkeypatch.setattr(worktrees, "_sync_existing_worktree", lambda **_kwargs: None)
 
     monkeypatch.setattr(
@@ -257,8 +260,7 @@ def test_ensure_pr_worktree_reuses_matching_path_and_rejects_wrong_branch(
         == path
     )
     assert any(
-        cmd[:4] == ["git", "-C", str(path), "checkout"]
-        and "feature" in cmd
+        cmd[:4] == ["git", "-C", str(path), "checkout"] and "feature" in cmd
         for cmd in seen_cmds
     )
 
@@ -459,7 +461,13 @@ def test_ensure_pr_worktree_prunes_missing_registered_worktree_and_retries_add(
     ],
 )
 def test_ensure_pr_worktree_handles_create_failures(
-    monkeypatch, tmp_path, capsys, completed_process, stderr, expected_exception, expected_message
+    monkeypatch,
+    tmp_path,
+    capsys,
+    completed_process,
+    stderr,
+    expected_exception,
+    expected_message,
 ):
     monkeypatch.setattr(
         worktrees, "_fetch_pr_branch_or_head", lambda **_kwargs: "origin/feature"
@@ -483,9 +491,7 @@ def test_ensure_pr_worktree_handles_create_failures(
     assert expected_message in captured.out or expected_exception is CommandError
 
 
-def test_cleanup_stale_loop_state_removes_locks_for_closed_prs(
-    monkeypatch, tmp_path
-):
+def test_cleanup_stale_loop_state_removes_locks_for_closed_prs(monkeypatch, tmp_path):
     tmp_root = tmp_path / "tmp"
     tmp_root.mkdir()
     worktree_root = tmp_path / "wt"
@@ -660,9 +666,7 @@ def test_cleanup_stale_loop_state_keeps_open_pr_worktrees(monkeypatch, tmp_path)
     assert not drop.exists()
 
 
-def test_cleanup_stale_loop_state_skips_foreign_origin_worktrees(
-    monkeypatch, tmp_path
-):
+def test_cleanup_stale_loop_state_skips_foreign_origin_worktrees(monkeypatch, tmp_path):
     import shutil as _shutil
     import subprocess as _sp
 
@@ -731,8 +735,9 @@ def test_check_formatting_summarizes_and_lists_failures():
     assert checks._bucket_summary(check_records) == "cancel=1, fail=1, pass=1"
     failing = checks._failing_check_records(check_records)
     assert [record["name"] for record in failing] == ["lint", "build"]
-    assert "- lint [FAILURE] workflow=ci.yml https://x" in checks._format_failing_checks(
-        failing
+    assert (
+        "- lint [FAILURE] workflow=ci.yml https://x"
+        in checks._format_failing_checks(failing)
     )
 
 
@@ -785,7 +790,10 @@ def test_wait_for_checks_green_returns_success_after_no_checks_grace(monkeypatch
     ("check_records", "were_required", "expected"),
     [
         (
-            [{"name": "unit", "bucket": "pass"}, {"name": "skip", "bucket": "skipping"}],
+            [
+                {"name": "unit", "bucket": "pass"},
+                {"name": "skip", "bucket": "skipping"},
+            ],
             True,
             True,
         ),
