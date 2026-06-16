@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Compatibility entry point for the Ralph loop CLI."""
+
 from __future__ import annotations
 
 import sys
@@ -20,7 +21,6 @@ from ralph_loop.errors import (
     CommandError,
     RebaseConflictError,
 )
-
 
 if __name__ == "__main__":
     try:
