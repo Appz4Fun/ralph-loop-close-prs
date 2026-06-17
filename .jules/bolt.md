@@ -1,0 +1,3 @@
+## 2024-06-17 - Concurrent GitHub PR Status Checks
+**Learning:** Subprocess calls to the GitHub CLI ('gh') like `gh pr view` can be a significant performance bottleneck when checked sequentially in a loop.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` with `executor.map` to perform multiple CLI checks concurrently, significantly reducing wait times for operations like N+1 PR state checks, while maintaining ordering and gracefully yielding exceptions. Always add a guard for empty iterables (`if not items: return []`) before passing length to `max_workers` to prevent `ValueError` for zero max workers.
