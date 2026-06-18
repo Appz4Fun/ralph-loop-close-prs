@@ -1,0 +1,3 @@
+## 2026-06-18 - Optimize PR state checks concurrency
+**Learning:** Subprocess calls to the GitHub CLI ('gh') sequentially can cause N+1 delays. When `_filter_to_still_open_prs` checks PR states, it spawns a subprocess for each. By using `concurrent.futures.ThreadPoolExecutor` we can parallelize these slow external command invocations significantly reducing supervisor sweep latency.
+**Action:** When filtering multiple items via subprocess commands, use a thread pool to execute them concurrently, while ensuring exceptions are properly mapped to items and order is preserved using `executor.map`. Always add a guard clause for empty lists when calculating `max_workers=min(10, len(items))` to avoid `ValueError` on empty sets.
