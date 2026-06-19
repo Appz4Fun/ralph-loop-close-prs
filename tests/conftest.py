@@ -81,9 +81,7 @@ class CliHarness:
         self.ensure_identity = Mock(name="cli._ensure_runtime_identity")
         self.git_branch = Mock(return_value="current", name="cli._git_branch")
         self.pr_view = Mock(return_value=self.pr_data, name="cli._pr_view")
-        self.acquire_lock = Mock(
-            return_value=self.lock, name="cli._acquire_loop_lock"
-        )
+        self.acquire_lock = Mock(return_value=self.lock, name="cli._acquire_loop_lock")
         self.ensure_worktree = Mock(
             return_value=self.worktree, name="cli._ensure_pr_worktree"
         )
@@ -103,9 +101,7 @@ class CliHarness:
         self.reset_changes = Mock(name="cli._reset_generated_changes")
         self.prepare_merge = Mock(name="cli._prepare_pr_for_merge")
         self.merge_pr = Mock(name="cli._merge_pr")
-        self.pr_review_comments = Mock(
-            return_value=[], name="cli._pr_review_comments"
-        )
+        self.pr_review_comments = Mock(return_value=[], name="cli._pr_review_comments")
         self.reply_review_comment = Mock(
             return_value=True, name="cli._reply_to_pr_review_comment"
         )
@@ -113,9 +109,7 @@ class CliHarness:
     def install(self):
         self.monkeypatch.setattr(cli, "_parse_args", self.parse_args)
         self.monkeypatch.setattr(cli.signal, "signal", self.signal)
-        self.monkeypatch.setattr(
-            cli, "_ensure_runtime_identity", self.ensure_identity
-        )
+        self.monkeypatch.setattr(cli, "_ensure_runtime_identity", self.ensure_identity)
         self.monkeypatch.setattr(cli, "_git_branch", self.git_branch)
         self.monkeypatch.setattr(cli, "_pr_view", self.pr_view)
         self.monkeypatch.setattr(cli, "_acquire_loop_lock", self.acquire_lock)
@@ -133,14 +127,10 @@ class CliHarness:
             cli, "_wait_for_required_checks_green", self.wait_checks
         )
         self.monkeypatch.setattr(cli, "_run_ci_fix_round", self.ci_fix)
-        self.monkeypatch.setattr(
-            cli, "_reset_generated_changes", self.reset_changes
-        )
+        self.monkeypatch.setattr(cli, "_reset_generated_changes", self.reset_changes)
         self.monkeypatch.setattr(cli, "_prepare_pr_for_merge", self.prepare_merge)
         self.monkeypatch.setattr(cli, "_merge_pr", self.merge_pr)
-        self.monkeypatch.setattr(
-            cli, "_pr_review_comments", self.pr_review_comments
-        )
+        self.monkeypatch.setattr(cli, "_pr_review_comments", self.pr_review_comments)
         self.monkeypatch.setattr(
             cli, "_reply_to_pr_review_comment", self.reply_review_comment
         )
