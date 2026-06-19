@@ -1,0 +1,4 @@
+## 2026-06-19 - Prevent Git Argument Injection
+**Vulnerability:** Git commands like `checkout`, `fetch`, and `rebase` were accepting branch and ref names without validation. A malicious branch name starting with a hyphen (e.g., `-b` or `--exec`) could be interpreted as a command-line flag, leading to arbitrary code execution or unexpected behavior.
+**Learning:** Even when inputs come from a remote source (like GitHub API), they should be treated as untrusted and validated before being passed to shell commands, especially when using `subprocess` with `subprocess.Popen` or `subprocess.run` without `shell=True`, as arguments can still be interpreted as flags.
+**Prevention:** Always validate that branch, tag, and remote names do not start with a hyphen before passing them as arguments to `git` commands.
