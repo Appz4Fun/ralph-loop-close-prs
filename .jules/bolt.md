@@ -1,0 +1,3 @@
+## 2024-05-24 - Subprocess calls to `gh` are a bottleneck
+**Learning:** Sequential subprocess calls to the GitHub CLI (`gh`) create a significant N+1 execution delay, slowing down operations like checking PR states for multiple PRs.
+**Action:** Use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) with `executor.map` to execute these subprocess checks in parallel while preserving order. Ensure a guard clause is added for empty collections to avoid `max_workers=0` ValueErrors.
