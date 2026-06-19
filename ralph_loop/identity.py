@@ -1,4 +1,5 @@
 """Runtime identity and signing checks."""
+
 from __future__ import annotations
 
 import os
@@ -20,7 +21,6 @@ from .errors import CommandError
 from .gh_ops import _active_gh_user
 from .git_ops import _git_config_get
 from .process import _print_step, _run_command
-
 
 _GIT_CONFIG_LOCK_RETRIES = 12
 _GIT_CONFIG_LOCK_BASE_DELAY = 0.05
@@ -50,11 +50,12 @@ def _set_git_config_if_changed(key: str, value: str) -> None:
             if "could not lock config file" not in text:
                 raise
             last_error = exc
-            delay = _GIT_CONFIG_LOCK_BASE_DELAY * (2 ** attempt)
+            delay = _GIT_CONFIG_LOCK_BASE_DELAY * (2**attempt)
             time.sleep(delay + random.uniform(0, delay))
             if _git_config_get(key) == value:
                 return
     raise last_error
+
 
 def _is_truthy(value: str) -> bool:
     return value.lower() in ("1", "true", "yes", "on")
@@ -135,9 +136,7 @@ def _validate_identity_and_signing():
 
 def _ensure_runtime_identity():
     if not os.path.exists(SSH_AUTH_KEY):
-        raise CommandError(
-            "Required SSH auth key is missing: {}".format(SSH_AUTH_KEY)
-        )
+        raise CommandError("Required SSH auth key is missing: {}".format(SSH_AUTH_KEY))
     if not os.path.exists(SSH_SIGNING_KEY):
         raise CommandError(
             "Required SSH signing key is missing: {}".format(SSH_SIGNING_KEY)
@@ -154,18 +153,13 @@ def _ensure_runtime_identity():
         capture_output=True,
     )
     origin_url = (origin.stdout or "").strip()
-    if not (
-        origin_url.startswith("git@")
-        or origin_url.startswith("ssh://")
-    ):
+    if not (origin_url.startswith("git@") or origin_url.startswith("ssh://")):
         raise CommandError(
             "origin remote must use SSH so Ralph pushes with the configured SSH identity: {}".format(
                 origin_url or "<empty>"
             )
         )
-    _print_step(
-        "Setting git identity and SSH/signing keys for '{}'".format(GH_USER)
-    )
+    _print_step("Setting git identity and SSH/signing keys for '{}'".format(GH_USER))
     _set_git_config_if_changed("user.name", GIT_NAME)
     _set_git_config_if_changed("user.email", GIT_EMAIL)
     _set_git_config_if_changed("core.sshCommand", SSH_COMMAND)
