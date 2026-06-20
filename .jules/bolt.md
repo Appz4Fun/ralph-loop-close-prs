@@ -1,0 +1,3 @@
+## 2024-05-15 - Concurrent PR Check Optimization
+**Learning:** Subprocess calls to the GitHub CLI (`gh`) are a significant performance bottleneck. When fanning out to check state across many PRs sequentially in `_filter_to_still_open_prs`, N+1 delays accumulate rapidly.
+**Action:** Always wrap independent CLI state-check loops in `concurrent.futures.ThreadPoolExecutor` using `executor.map` to preserve evaluation order, ensuring exceptions are safely caught and re-yielded inside the worker. Add a guard clause (`if not collection: return []`) before initializing `ThreadPoolExecutor` with calculated `max_workers` to prevent `ValueError` on empty sequences.
