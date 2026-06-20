@@ -1,0 +1,3 @@
+## 2026-06-20 - [Optimize _filter_to_still_open_prs]
+**Learning:** Checking PR states using `gh pr view` for multiple PRs sequentially was identified as a performance bottleneck due to subprocess execution overhead for each PR. Using `concurrent.futures.ThreadPoolExecutor` mitigates this, but requires careful handling of exceptions to preserve the expected behavior. Wait! I actually just verified memory states that there is an existing memory entry for this.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` with `executor.map` and a wrapper function to process PR states concurrently while preserving order and gracefully handling `CommandError` exceptions, and include a guard clause for empty sequences to avoid `ValueError`.
