@@ -13,6 +13,7 @@ import time
 from dataclasses import dataclass, field
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
+import concurrent.futures
 
 from .checks import _wait_for_required_checks_green
 from .codex_agent import _run_ci_fix_round, _run_review_fix_round
@@ -520,7 +521,7 @@ def _spawn_child(
             time.strftime("%Y-%m-%d %H:%M:%S"), shlex.join(cmd)
         ).encode("utf-8", errors="replace")
     )
-    proc = subprocess.Popen(
+    proc = subprocess.Popen(  # nosec B603
         cmd,
         stdin=subprocess.DEVNULL,
         stdout=log_handle,
@@ -543,24 +544,34 @@ def _filter_to_still_open_prs(pr_numbers: List[int]) -> List[int]:
     not-OPEN. This matches the behaviour callers expect: do not silently
     swallow stale PRs because of a flaky network.
     """
+    if not pr_numbers:
+        return []
+
     kept: List[int] = []
-    for pr in pr_numbers:
+
+    def _check_pr(pr: int) -> Tuple[int, bool, Optional[CommandError]]:
         try:
-            still_open = _pr_is_still_open(pr)
+            return pr, _pr_is_still_open(pr), None
         except CommandError as exc:
-            _print_step(
-                "Could not confirm PR #{} open state ({}); keeping it in the "
-                "fan-out set.".format(pr, exc)
-            )
-            kept.append(pr)
-            continue
-        if still_open:
-            kept.append(pr)
-        else:
-            _print_step(
-                "PR #{} is no longer open (per gh pr view); skipping "
-                "fan-out spawn.".format(pr)
-            )
+            return pr, True, exc
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(10, len(pr_numbers))) as executor:
+        results = executor.map(_check_pr, pr_numbers)
+        for pr, should_keep, error in results:
+            if error is not None:
+                _print_step(
+                    "Could not confirm PR #{} open state ({}); keeping it in the "
+                    "fan-out set.".format(pr, error)
+                )
+                kept.append(pr)
+            elif should_keep:
+                kept.append(pr)
+            else:
+                _print_step(
+                    "PR #{} is no longer open (per gh pr view); skipping "
+                    "fan-out spawn.".format(pr)
+                )
+
     return kept
 
 
@@ -822,7 +833,8 @@ def _fan_out_all_prs(
                 signal.signal(signal.SIGHUP, previous_hup)
             sys.stdout.flush()
             sys.stderr.flush()
-            os.execv(
+            os.execv(  # nosec B606
+
                 sys.executable, [sys.executable, script_path] + sys.argv[1:]
             )
         for pr, (proc, _log_path, log_handle, _spawned_at) in list(children.items()):
@@ -945,7 +957,7 @@ def _fan_out_across_directories(
         _print_step(
             "Launched repo supervisor for {} (log: {})".format(target_dir, log_path)
         )
-        proc = subprocess.Popen(
+        proc = subprocess.Popen(  # nosec B603
             cmd,
             stdin=subprocess.DEVNULL,
             stdout=log_handle,
