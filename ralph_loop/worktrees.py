@@ -1,4 +1,5 @@
 """PR worktree and lock management."""
+
 from __future__ import annotations
 
 import fcntl
@@ -12,6 +13,7 @@ from typing import Callable, Dict, Optional, Set
 from .config import LOOP_ALREADY_RUNNING_MESSAGE
 from .errors import LOOP_ALREADY_RUNNING_EXIT_CODE, CommandError
 from .process import _print_step, _run_command
+
 
 def _slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", value).strip("-")
@@ -346,6 +348,12 @@ def _pr_head_fetch_ref(pr_number: int) -> str:
 def _fetch_pr_branch_or_head(
     *, pr_number: int, branch: str, cwd: Optional[str] = None
 ) -> str:
+    if branch.startswith("-"):
+        from .errors import CommandError
+
+        raise CommandError(
+            "Invalid branch name '{}': cannot start with a hyphen.".format(branch)
+        )
     fetch_branch = _run_command(
         ["git", "fetch", "origin", branch],
         check=False,
