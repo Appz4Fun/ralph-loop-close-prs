@@ -1,0 +1,3 @@
+## 2026-06-23 - Concurrent gh pr list child checks
+**Learning:** Subprocess calls to the GitHub CLI ('gh') were observed as a significant performance bottleneck in `cli.py` specifically when filtering lists of PRs. Specifically, checking `_pr_is_still_open` for each PR in a fan-out set sequentially caused N+1 execution delays.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to check PR states in parallel. Make sure to gracefully handle transient `CommandError` instances by capturing and re-raising them as appropriate or just processing them as `kept`, while guarding against `max_workers=0` on empty lists.
