@@ -1,0 +1,3 @@
+## 2026-06-23 - Concurrent gh pr view calls during fan-out
+**Learning:** Subprocess calls to the GitHub CLI ('gh'), typically executed via `_gh_run_with_retry` / `_gh_json` / `_pr_is_still_open`, are a significant performance bottleneck. When checking states for multiple PRs sequentially during supervisor fan-out, the process experiences N+1 sequential execution delays which lags startup.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` when checking open states for multiple PRs to avoid sequential delays. Wrap the helper in a try/except to gracefully yield and capture `CommandError` exceptions and strictly use `max_workers=min(10, len(items))` along with a guard clause `if not items: return []` to prevent `ValueError` for empty collections.
