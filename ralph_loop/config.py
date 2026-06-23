@@ -1,4 +1,5 @@
 """Configuration constants for the Ralph loop."""
+
 from __future__ import annotations
 
 import os

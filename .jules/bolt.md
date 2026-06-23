@@ -1,0 +1,3 @@
+## 2024-05-18 - Concurrent execution of gh CLI subprocesses
+**Learning:** Subprocess calls to the GitHub CLI ('gh') are slow. When iterating over a collection (like a list of PR numbers) to check states via `gh`, doing so sequentially creates a significant N+1 performance bottleneck.
+**Action:** Use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) to execute N+1 subprocess calls in parallel, which provides almost an order of magnitude speedup. Ensure the original order is preserved using `executor.map` and correctly catch/yield exceptions. Always include a guard clause for empty inputs when dynamically setting `max_workers=min(X, len(collection))`.
