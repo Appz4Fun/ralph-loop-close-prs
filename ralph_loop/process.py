@@ -1,4 +1,5 @@
 """Process execution and logging helpers."""
+
 from __future__ import annotations
 
 import datetime
@@ -44,7 +45,9 @@ def _remaining_command_timeout(printable_cmd: str) -> Optional[float]:
     return remaining
 
 
-def _read_bounded_output(handle, limit: Optional[int] = MAX_CAPTURED_STREAM_BYTES) -> str:
+def _read_bounded_output(
+    handle, limit: Optional[int] = MAX_CAPTURED_STREAM_BYTES
+) -> str:
     handle.flush()
     handle.seek(0, os.SEEK_END)
     size = handle.tell()
@@ -147,7 +150,9 @@ def _run_command(
                     cwd=cwd,
                     stdout=stdout_spool,
                     stderr=stderr_spool,
-                    input=input_text.encode("utf-8") if input_text is not None else None,
+                    input=(
+                        input_text.encode("utf-8") if input_text is not None else None
+                    ),
                     stdin=subprocess.DEVNULL if input_text is None else None,
                     check=False,
                     timeout=timeout,
@@ -218,9 +223,7 @@ def _truncate_for_log(text: str, limit: int = 500) -> str:
     head = limit // 2
     tail = limit - head
     omitted = len(text) - limit
-    return "{}...<truncated {} chars>...{}".format(
-        text[:head], omitted, text[-tail:]
-    )
+    return "{}...<truncated {} chars>...{}".format(text[:head], omitted, text[-tail:])
 
 
 def _completed_process_output(completed: subprocess.CompletedProcess) -> str:
