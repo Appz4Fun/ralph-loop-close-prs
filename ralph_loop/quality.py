@@ -1,4 +1,5 @@
 """Local quality gates and commit/push flow."""
+
 from __future__ import annotations
 
 import re
@@ -38,7 +39,9 @@ _SECRET_PATTERNS = (
     re.compile(
         r"(?i)(\b[A-Z][A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API[_-]?KEY|ACCESS[_-]?KEY)[A-Z0-9_]*\s*=\s*)[^\s]+"
     ),
-    re.compile(r"\b(?:ghp_[A-Za-z0-9_]{8,}|github_pat_[A-Za-z0-9_]{8,}|sk-[A-Za-z0-9_-]{8,}|xox[baprs]-[A-Za-z0-9_-]{8,})\b"),
+    re.compile(
+        r"\b(?:ghp_[A-Za-z0-9_]{8,}|github_pat_[A-Za-z0-9_]{8,}|sk-[A-Za-z0-9_-]{8,}|xox[baprs]-[A-Za-z0-9_-]{8,})\b"
+    ),
     re.compile(r"https?://[^\s]+"),
     re.compile(r"\bgit@[^:\s]+:[^\s]+"),
 )
@@ -131,9 +134,7 @@ def _run_local_quality_gates() -> Tuple[bool, str]:
                 output,
             )
             _print_step(
-                "just {} failed; starting a local quality repair round.".format(
-                    recipe
-                )
+                "just {} failed; starting a local quality repair round.".format(recipe)
             )
             return False, _truncate_for_log(
                 _redact_for_prompt(failure_summary),
@@ -243,9 +244,7 @@ def _commit_and_push(
                 "No committable working-tree changes after filtering generated artifacts; pushing existing Codex commits."
             )
         else:
-            _print_step(
-                "No committable changes after filtering generated artifacts."
-            )
+            _print_step("No committable changes after filtering generated artifacts.")
             _reset_generated_changes(pre_round_sha)
             return "no_changes"
     else:
