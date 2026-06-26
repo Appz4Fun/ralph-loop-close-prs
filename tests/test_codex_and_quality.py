@@ -162,9 +162,7 @@ def test_codex_exec_reads_last_message_and_passes_model_and_sandbox(
     assert "prompt" not in seen_calls[0][1]["log_cmd"]
 
 
-def test_codex_exec_reads_last_message_with_size_bound(
-    monkeypatch, completed_process
-):
+def test_codex_exec_reads_last_message_with_size_bound(monkeypatch, completed_process):
     def fake_run(cmd, check, capture_output, **_kwargs):
         output_path = cmd[cmd.index("-o") + 1]
         with open(output_path, "w", encoding="utf-8") as handle:
@@ -220,7 +218,9 @@ def test_codex_exec_does_not_read_unbounded_last_message(
 
     def guarded_open(path, *args, **kwargs):
         handle = real_open(path, *args, **kwargs)
-        if path == output_path_holder.get("path") and "r" in (args[0] if args else kwargs.get("mode", "r")):
+        if path == output_path_holder.get("path") and "r" in (
+            args[0] if args else kwargs.get("mode", "r")
+        ):
             return GuardedReader(handle)
         return handle
 
@@ -314,7 +314,7 @@ def test_codex_exec_raises_when_failed_run_has_partial_last_message(
         "/bin/zsh:1: no such file or directory: /review",
         "exec: /bin/bash -lc /review exited 127",
         "ERROR: You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at May 16th, 2026 2:30 AM.",
-        "ERROR: unexpected status 401 Unauthorized: {\"error\":\"invalid api key\"}",
+        'ERROR: unexpected status 401 Unauthorized: {"error":"invalid api key"}',
         "ERROR: exceeded retry limit, last status: 429 Too Many Requests",
         "failed to connect to websocket: HTTP error: 502 Bad Gateway",
     ],
@@ -437,9 +437,7 @@ def test_review_round_uses_marker_inference_and_error_paths(monkeypatch, spy):
         codex_agent._run_review_fix_round(2, "main", None)
 
 
-def test_review_round_surfaces_external_comments_and_parses_addressed(
-    monkeypatch, spy
-):
+def test_review_round_surfaces_external_comments_and_parses_addressed(monkeypatch, spy):
     captured = {}
 
     def fake_exec(*, prompt, marker_regex, model):
@@ -651,7 +649,7 @@ def test_local_quality_gates_redacts_urls_and_common_secret_assignments(
 
 
 def test_commit_and_push_returns_no_changes_for_clean_tree_without_new_commits(
-    monkeypatch
+    monkeypatch,
 ):
     monkeypatch.setattr(quality, "_git_head_sha", lambda: "abc")
     monkeypatch.setattr(quality, "_working_tree_dirty", lambda: False)
@@ -965,14 +963,14 @@ def test_commit_and_push_reports_local_quality_repair_telemetry(
     assert ["git", "push", "origin", "feature"] in commands
 
 
-def test_commit_and_push_discards_when_quality_repair_cannot_continue(
-    monkeypatch, spy
-):
+def test_commit_and_push_discards_when_quality_repair_cannot_continue(monkeypatch, spy):
     reset = spy()
     monkeypatch.setattr(quality, "_git_head_sha", lambda: "abc")
     monkeypatch.setattr(quality, "_working_tree_dirty", lambda: True)
     monkeypatch.setattr(quality, "_run_local_quality_gates", lambda: (False, "fail"))
-    monkeypatch.setattr(quality, "_run_local_quality_fix_round", lambda **_kwargs: False)
+    monkeypatch.setattr(
+        quality, "_run_local_quality_fix_round", lambda **_kwargs: False
+    )
     monkeypatch.setattr(quality, "_reset_generated_changes", reset)
 
     assert (

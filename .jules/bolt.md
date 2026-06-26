@@ -1,0 +1,3 @@
+## 2026-06-25 - Concurrency in GH CLI PR checking
+**Learning:** Subprocess calls to the GitHub CLI (`gh`) via `_pr_is_still_open` (which calls `_gh_json`) are a significant performance bottleneck when verifying multiple PRs sequentially. By executing these calls concurrently using `concurrent.futures.ThreadPoolExecutor`, we avoid N+1 sequential execution delays and can dramatically reduce the time it takes to fan-out PRs. Order is preserved by using `executor.map`, and we capture exceptions cleanly.
+**Action:** Always consider concurrency for loops that perform high-latency I/O operations (like subprocess CLI calls or network requests) that do not depend on each other, while preserving order and exception handling.
