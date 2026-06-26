@@ -1,4 +1,5 @@
 """GitHub check polling and formatting helpers."""
+
 from __future__ import annotations
 
 import time
@@ -8,6 +9,7 @@ from .errors import CommandError
 from .gh_ops import _required_checks
 from .process import _print_step
 from .runtime import _check_wall_clock
+
 
 def _bucket_summary(checks) -> str:
     counts = {}
@@ -40,9 +42,7 @@ def _format_failing_checks(records: Sequence[dict]) -> str:
     for rec in records:
         workflow = " workflow={}".format(rec["workflow"]) if rec.get("workflow") else ""
         link = " {}".format(rec["link"]) if rec.get("link") else ""
-        lines.append(
-            "- {} [{}]{}{}".format(rec["name"], rec["state"], workflow, link)
-        )
+        lines.append("- {} [{}]{}{}".format(rec["name"], rec["state"], workflow, link))
     return "\n".join(lines)
 
 
@@ -113,9 +113,7 @@ def _wait_for_required_checks_green(
                     return True, checks
                 _print_step(
                     "No required checks reported yet; fallback checks are "
-                    "green, waiting (grace {}s).".format(
-                        no_checks_grace_seconds
-                    )
+                    "green, waiting (grace {}s).".format(no_checks_grace_seconds)
                 )
                 sleep_for_next_poll()
                 continue

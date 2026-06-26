@@ -103,7 +103,9 @@ sleep 30
         assert result.stdout.strip() == "started {}".format(runner_pid)
         assert _pid_is_live(runner_pid)
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
 
 def test_start_writes_iteration_header_once(tmp_path):
@@ -181,7 +183,9 @@ fi
         else:
             raise AssertionError("runner did not write an iteration header")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     out = out_file.read_text()
     assert "selecting_repo iteration=1 root={}".format(search_root) in out
@@ -305,7 +309,9 @@ fi
         else:
             raise AssertionError("runner did not reach post-selection status check")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     calls = call_log.read_text().splitlines()
     source_line = next(
@@ -404,7 +410,9 @@ sleep 30
         else:
             raise AssertionError("runner did not record the timeout")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     assert rogue_pid is not None
     try:
@@ -476,7 +484,10 @@ sleep 30
     try:
         deadline = time.time() + 12
         while time.time() < deadline:
-            if out_file.exists() and "selecting_repo iteration=2" in out_file.read_text():
+            if (
+                out_file.exists()
+                and "selecting_repo iteration=2" in out_file.read_text()
+            ):
                 break
             if proc.poll() is not None:
                 raise AssertionError(
@@ -556,7 +567,11 @@ exit 1
         _run([str(script), "start"], env=env, stdout=subprocess.PIPE)
         deadline = time.time() + 15
         while time.time() < deadline:
-            if out_file.exists() and "codex_usage_limited iteration=1; sleeping 60s" in out_file.read_text():
+            if (
+                out_file.exists()
+                and "codex_usage_limited iteration=1; sleeping 60s"
+                in out_file.read_text()
+            ):
                 break
             time.sleep(0.1)
         else:
@@ -566,7 +581,9 @@ exit 1
         out = out_file.read_text()
         assert "selecting_repo iteration=2" not in out
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
 
 def test_retry_limit_response_backs_off_instead_of_advancing(tmp_path):
@@ -628,7 +645,11 @@ exit 1
         _run([str(script), "start"], env=env, stdout=subprocess.PIPE)
         deadline = time.time() + 15
         while time.time() < deadline:
-            if out_file.exists() and "codex_usage_limited iteration=1; sleeping 60s" in out_file.read_text():
+            if (
+                out_file.exists()
+                and "codex_usage_limited iteration=1; sleeping 60s"
+                in out_file.read_text()
+            ):
                 break
             time.sleep(0.1)
         else:
@@ -638,7 +659,9 @@ exit 1
         out = out_file.read_text()
         assert "selecting_repo iteration=2" not in out
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
 
 def test_setup_timeout_prevents_codex_from_starting(tmp_path):
@@ -729,7 +752,9 @@ printf 'codex_started\\n' >> "${RALPH_TEST_CALL_LOG}"
         else:
             raise AssertionError("runner did not finish setup-timeout scenario")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     assert _logs_contain(log_dir, "Iteration setup timed out")
     assert not call_log.exists()
@@ -839,7 +864,10 @@ exit 1
     try:
         deadline = time.time() + 10
         while time.time() < deadline:
-            if out_file.exists() and "selecting_repo iteration=2" in out_file.read_text():
+            if (
+                out_file.exists()
+                and "selecting_repo iteration=2" in out_file.read_text()
+            ):
                 break
             if proc.poll() is not None:
                 raise AssertionError("runner exited after a worktree cleanup failure")
@@ -1056,7 +1084,9 @@ sleep 30
         else:
             raise AssertionError("runner did not exit after SIGTERM")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     assert worktree is not None
     assert not worktree.exists()
@@ -1130,7 +1160,9 @@ sleep 30
         else:
             raise AssertionError("runner did not create an active worktree")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     assert worktree is not None
     deadline = time.time() + 10
@@ -1221,7 +1253,9 @@ sleep 30
         else:
             raise AssertionError("runner did not create an active worktree")
     finally:
-        subprocess.run([str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True)
+        subprocess.run(
+            [str(script), "stop"], env=env, stdout=subprocess.PIPE, text=True
+        )
 
     assert worktree is not None
     deadline = time.time() + 10
