@@ -1,0 +1,3 @@
+## 2024-06-26 - Parallelize PR state checks in fan-out
+**Learning:** Checking PR statuses sequentially using `gh pr view` for each PR in a batch can be very slow due to process overhead and network latency. Using a thread pool to perform these checks in parallel significantly reduces the wall-clock time required for the initial validation step of the fan-out supervisor.
+**Action:** When filtering or processing multiple remote resources, use `concurrent.futures.ThreadPoolExecutor` and `executor.map()` to parallelize operations while maintaining the original sequence order, and handle API rate limits appropriately.
