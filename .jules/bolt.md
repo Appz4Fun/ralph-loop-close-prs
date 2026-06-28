@@ -1,0 +1,3 @@
+## 2024-05-24 - [Optimize PR state check]
+**Learning:** Sequential subprocess calls to GitHub CLI ('gh'), typically executed via '_gh_json' or '_gh_run_with_retry', are a significant performance bottleneck. When checking states for multiple PRs, use concurrency to avoid N+1 sequential execution delays. Ensure that the original order is preserved by using executor.map, and capture exceptions in a helper wrapper so they can be yielded and handled gracefully in order.
+**Action:** When filtering a list of items using network or subprocess calls, use concurrent.futures.ThreadPoolExecutor with executor.map to parallelize the work while maintaining correct ordering and robust error handling.
