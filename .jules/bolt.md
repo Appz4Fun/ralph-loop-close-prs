@@ -1,0 +1,3 @@
+## 2024-06-30 - Optimize PR open state checking with concurrency
+**Learning:** Checking PR state sequentially using `_pr_is_still_open` with subprocess calls to the GitHub CLI is a significant performance bottleneck, especially when scaling to many PRs. Since these checks are independent, they suffer from N+1 delays.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` with `executor.map` to perform these state checks concurrently. Ensure `max_workers` safely handles empty lists (e.g., via a guard clause or `max_workers=min(10, len(items) or 1)`) and exceptions are gracefully caught and yielded to maintain ordering without halting the entire process.
