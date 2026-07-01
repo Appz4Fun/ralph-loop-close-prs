@@ -1,4 +1,5 @@
 """Git command helpers."""
+
 from __future__ import annotations
 
 import sys
@@ -7,6 +8,7 @@ from typing import Optional, Sequence
 from .config import LOOP_ALREADY_RUNNING_MESSAGE
 from .errors import CommandError, RebaseConflictError
 from .process import _print_step, _run_command
+
 
 def _git_output(args: Sequence[str]) -> str:
     completed = _run_command(["git"] + list(args), check=True, capture_output=True)
@@ -37,7 +39,16 @@ def _working_tree_dirty() -> bool:
     return bool(_git_output(["status", "--porcelain"]))
 
 
+def _validate_git_ref(ref: str) -> None:
+    """Validate that a git reference doesn't start with a hyphen to prevent argument injection."""
+    if ref.startswith("-"):
+        raise CommandError(
+            "Invalid git reference '{}': cannot start with a hyphen".format(ref)
+        )
+
+
 def _checkout_branch(branch: str):
+    _validate_git_ref(branch)
     current_branch = _git_branch()
     if current_branch == branch:
         return
@@ -117,22 +128,22 @@ def _fetch_with_retry(remote: str, ref: str):
     last_exc: Optional[CommandError] = None
     for attempt in range(_FETCH_MAX_ATTEMPTS):
         try:
-            _run_command(
-                ["git", "fetch", remote, ref], check=True, capture_output=True
-            )
+            _run_command(["git", "fetch", remote, ref], check=True, capture_output=True)
             return
         except CommandError as exc:
             text = str(exc).lower()
             if not any(p in text for p in _FETCH_TRANSIENT_PATTERNS):
                 raise
             last_exc = exc
-            delay = 0.5 * (2 ** attempt)
+            delay = 0.5 * (2**attempt)
             _time.sleep(delay + _random.uniform(0, delay))
     assert last_exc is not None
     raise last_exc
 
 
 def _rebase_onto_base(branch: str, base: str):
+    _validate_git_ref(branch)
+    _validate_git_ref(base)
     _print_step("Rebasing {} onto origin/{}".format(branch, base))
     _fetch_with_retry("origin", base)
     rebase = _run_command(
@@ -141,9 +152,7 @@ def _rebase_onto_base(branch: str, base: str):
     if rebase.returncode != 0:
         output = "{}\n{}".format(rebase.stdout or "", rebase.stderr or "").strip()
         if any(pattern in output.lower() for pattern in _REBASE_CONFLICT_PATTERNS):
-            _run_command(
-                ["git", "rebase", "--abort"], check=False, capture_output=True
-            )
+            _run_command(["git", "rebase", "--abort"], check=False, capture_output=True)
             raise RebaseConflictError(
                 "Rebase conflict while rebasing '{}' onto origin/{}:\n{}".format(
                     branch, base, output
