@@ -1,0 +1,3 @@
+## 2025-07-02 - Optimize `_filter_to_still_open_prs` concurrency
+**Learning:** `_filter_to_still_open_prs` was making sequential N+1 calls to `_pr_is_still_open` which invokes the `gh pr view` CLI operation. The CLI operations are a significant performance bottleneck.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` coupled with `executor.map` to perform these operations concurrently to reduce latency, while catching and forwarding errors so they can be processed and appended correctly. Ensure an early return guard `if not pr_numbers: return []` is included before computing `max_workers` to avoid ValueError with 0 max workers.
