@@ -1,0 +1,3 @@
+## 2024-05-20 - Concurrent execution for sequential gh pr view calls
+**Learning:** Sequential `gh` CLI subprocess calls during fan-out create a significant N+1 performance bottleneck. Subprocess calls are expensive and checking multiple PRs sequentially delays supervisor startup significantly.
+**Action:** When performing independent network/CLI checks across a collection of items (like PR numbers), use `concurrent.futures.ThreadPoolExecutor` to execute them concurrently, being mindful to handle `max_workers=0` on empty lists and capturing exceptions inside the worker to preserve error handling logic.
