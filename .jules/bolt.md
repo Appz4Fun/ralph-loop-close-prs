@@ -1,0 +1,3 @@
+## 2024-05-14 - Concurrent GitHub API Calls for PR State
+**Learning:** The supervisor sequentially calls `gh pr view` for each open PR via `_pr_is_still_open`. This sequential execution is a significant performance bottleneck when checking many PRs (N+1 queries), as each subprocess call to the `gh` CLI adds overhead and network latency.
+**Action:** When filtering or checking multiple items (like PRs) via subprocesses or network calls, use `concurrent.futures.ThreadPoolExecutor` to process them concurrently, reducing total wait time. Always ensure exceptions are caught and handled gracefully in the concurrent worker to replicate original synchronous error-handling semantics.
