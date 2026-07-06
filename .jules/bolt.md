@@ -1,0 +1,3 @@
+## 2024-07-06 - Batch GitHub CLI calls with ThreadPoolExecutor
+**Learning:** The application loops over multiple PRs in `_filter_to_still_open_prs` and calls `_pr_is_still_open` sequentially, which forks the expensive `gh pr view` CLI command for each PR. This N+1 query problem significantly slows down the supervisor cycle.
+**Action:** When performing independent CLI operations on a collection of items (like PRs), use `concurrent.futures.ThreadPoolExecutor` to execute them concurrently while handling exceptions sequentially on the main thread to avoid interleaved logs. Always add a guard clause for empty lists.
