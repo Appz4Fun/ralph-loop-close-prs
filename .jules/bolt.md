@@ -1,0 +1,3 @@
+## 2024-05-18 - Speed up PR state filtering via concurrent gh CLI execution
+**Learning:** Sequential subprocess calls to the GitHub CLI ('gh') to check PR states are a performance bottleneck in fan-out operations, especially as the number of open PRs grows. The N+1 delay caused by individual `gh pr view` calls blocks the main supervisor thread.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to execute independent `gh` CLI checks in parallel. Catch and capture exceptions inside worker threads to return them to the main thread, ensuring logs remain strictly sequential and unordered logging is avoided. Always add a guard clause for empty collections to avoid `ValueError` with `max_workers`.
