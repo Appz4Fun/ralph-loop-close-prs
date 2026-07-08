@@ -1,0 +1,3 @@
+## 2024-07-08 - Use Concurrency to Avoid N+1 Subprocess Bottlenecks
+**Learning:** When performing fan-out actions like checking states for multiple PRs using subprocess calls to the GitHub CLI ('gh'), doing so sequentially introduces an N+1 performance bottleneck.
+**Action:** Use `concurrent.futures.ThreadPoolExecutor` to perform these subprocess calls concurrently. When using threads, avoid calling logging functions (like `_print_step`) directly from worker threads to prevent interleaved logs; instead, use a helper wrapper to capture exceptions and yield them back to the main thread via `executor.map`, then handle logging sequentially. Always add a guard clause for empty inputs.
