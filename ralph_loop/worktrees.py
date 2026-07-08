@@ -1,4 +1,5 @@
 """PR worktree and lock management."""
+
 from __future__ import annotations
 
 import fcntl
@@ -12,6 +13,7 @@ from typing import Callable, Dict, Optional, Set
 from .config import LOOP_ALREADY_RUNNING_MESSAGE
 from .errors import LOOP_ALREADY_RUNNING_EXIT_CODE, CommandError
 from .process import _print_step, _run_command
+
 
 def _slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", value).strip("-")
@@ -505,6 +507,8 @@ def _ensure_pr_worktree(
     pr_number: int,
     branch: str,
 ) -> str:
+    if branch.startswith("-"):
+        raise ValueError("Invalid branch name")
     os.makedirs(worktree_root, exist_ok=True)
     path = _worktree_path(
         worktree_root=worktree_root,
