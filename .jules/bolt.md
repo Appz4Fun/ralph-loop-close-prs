@@ -1,0 +1,3 @@
+## 2024-07-11 - Optimize Subprocess Operations in Loops
+**Learning:** Subprocess calls to the GitHub CLI ('gh') can become a significant performance bottleneck when executed sequentially in a loop, particularly when fetching states for multiple items like PRs (N+1 delay problem).
+**Action:** Use concurrency (e.g., `concurrent.futures.ThreadPoolExecutor`) to execute independent subprocess calls in parallel. Use `executor.map` to preserve the order of results. Always capture exceptions in the worker threads and yield them back to the main thread to avoid interleaving logs from concurrent `_print_step` calls.
